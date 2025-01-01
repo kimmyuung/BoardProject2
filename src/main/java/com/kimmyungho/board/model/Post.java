@@ -7,6 +7,8 @@ import java.time.ZonedDateTime;
 @Setter@AllArgsConstructor
 @ToString@EqualsAndHashCode
 
+// public record Post(Long postId, String body, ZonedDateTime createDateTime) {}
+
 public class Post {
     private Long postId;
 
