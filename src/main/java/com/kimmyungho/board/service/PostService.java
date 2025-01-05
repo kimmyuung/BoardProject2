@@ -1,14 +1,13 @@
 package com.kimmyungho.board.service;
 
+import com.kimmyungho.board.exception.post.PostNotFoundException;
 import com.kimmyungho.board.model.Post;
 import com.kimmyungho.board.model.PostPathRequestBody;
 import com.kimmyungho.board.model.PostPostRequestBody;
 import com.kimmyungho.board.model.entity.PostEntity;
 import com.kimmyungho.board.repository.PostEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @Service
@@ -27,7 +26,7 @@ PostService {
                 postEntityRepository
                 .findById(postId)
                 .orElseThrow(
-                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "GET Post ID not found.")
+                        () -> new PostNotFoundException(postId)
                 );
         /* posts.stream().filter(post
                 -> postId.equals(post.getPostId())).findFirst();*/
@@ -46,7 +45,7 @@ PostService {
                 postEntityRepository
                         .findById(postId)
                         .orElseThrow(
-                                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "UPDATE Post not found.")
+                                () -> new PostNotFoundException(postId)
                         );
 
         postEntity.setBody(postPathRequestBody.getBody());
@@ -60,7 +59,7 @@ PostService {
                 postEntityRepository
                         .findById(postId)
                         .orElseThrow(
-                                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "DELETE Post not found.")
+                                () -> new PostNotFoundException(postId)
                         );
         postEntityRepository.delete(postEntity);
     }
