@@ -82,7 +82,7 @@ public class UserEntity implements UserDetails {
         // Avatar Placeholder Service(https://avatar-placeholder.iran.irana.run) 기반
         // 랜덤한 프로필 사진 설정(1 ~ 100)
         userEntity.setProfile(MessageFormat.format("https://avatar.iran.liara.run/public/{0}",
-                new Random().nextInt(100)));
+                new Random().nextInt(100) + 1));
 
         // 위 API 미작동시
         // userEntity.setProfile(MessageFormat.format("https://dev-jayce.github.io/public/profile/{0}",

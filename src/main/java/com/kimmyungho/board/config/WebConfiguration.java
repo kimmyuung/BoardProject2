@@ -3,6 +3,7 @@ package com.kimmyungho.board.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
@@ -37,7 +38,12 @@ public class WebConfiguration {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         http
                 .cors(Customizer.withDefaults())
-                .authorizeHttpRequests((requests) -> requests.anyRequest().authenticated())
+                .authorizeHttpRequests((requests) -> requests
+                        .requestMatchers(HttpMethod.POST,
+                                "/api/*/users"
+                        )
+                        .permitAll()
+                        .anyRequest().authenticated())
                 // 사용자의 어느 요청에 대해서건 검증이 필요
                 .sessionManagement(
                         (session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
