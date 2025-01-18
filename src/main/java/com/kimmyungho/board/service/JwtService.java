@@ -1,7 +1,6 @@
 package com.kimmyungho.board.service;
 
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -49,4 +48,33 @@ public class JwtService {
             throw  e;
         }
     }
+//private String getSubject(String token) {
+//    try {
+//        // JWT 토큰을 파싱하고 검증
+//        Claims claims = Jwts.parserBuilder()
+//                .setSigningKey(key) // 서명 키 설정
+//                .build()
+//                .parseClaimsJws(token) // 토큰 파싱 및 검증
+//                .getBody();
+//
+//        // subject 클레임 반환
+//        return claims.getSubject();
+//    } catch (ExpiredJwtException e) {
+//        // 토큰 만료 시
+//        logger.error("JWT Token is expired: {}", e.getMessage());
+//        throw new JwtAuthenticationException("Token has expired", e);
+//    } catch (MalformedJwtException e) {
+//        // 잘못된 형식의 토큰
+//        logger.error("Invalid JWT Token format: {}", e.getMessage());
+//        throw new JwtAuthenticationException("Invalid token format", e);
+//    } catch (SignatureException e) {
+//        // 서명이 일치하지 않음
+//        logger.error("Invalid JWT Token signature: {}", e.getMessage());
+//        throw new JwtAuthenticationException("Invalid token signature", e);
+//    } catch (JwtException e) {
+//        // 기타 JWT 관련 예외
+//        logger.error("JWT Token is invalid: {}", e.getMessage());
+//        throw new JwtAuthenticationException("Invalid JWT Token", e);
+//    }
+//}
 }

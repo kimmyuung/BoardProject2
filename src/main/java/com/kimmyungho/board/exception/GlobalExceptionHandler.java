@@ -41,12 +41,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ServerErrorResponse> handleClientErrorException(RuntimeException e) {
-        // return ResponseEntity.internalServerError().build(); 대체 가능
-        return new ResponseEntity<>(new ServerErrorResponse( HttpStatus.INTERNAL_SERVER_ERROR ).status() ) ;
+        return ResponseEntity.internalServerError().build();
+        //return new ResponseEntity<>(new ServerErrorResponse( HttpStatus.INTERNAL_SERVER_ERROR ).status()  ) ; 대체 가능
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ServerErrorResponse> handleClientErrorException(Exception e) {
-        return new ResponseEntity<>(new ServerErrorResponse( HttpStatus.INTERNAL_SERVER_ERROR ).status() );
+        return ResponseEntity.internalServerError().build();
+        //return new ResponseEntity<>(new ServerErrorResponse( HttpStatus.INTERNAL_SERVER_ERROR ).status()  ); 대체 가능
     }
 }

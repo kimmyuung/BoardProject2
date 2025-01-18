@@ -6,7 +6,6 @@ import com.kimmyungho.board.model.post.PostPathRequestBody;
 import com.kimmyungho.board.model.post.PostPostRequestBody;
 import com.kimmyungho.board.model.entity.PostEntity;
 import com.kimmyungho.board.repository.PostEntityRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 

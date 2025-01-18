@@ -1,6 +1,8 @@
 package com.kimmyungho.board.controller;
 
 import com.kimmyungho.board.model.user.User;
+import com.kimmyungho.board.model.user.UserAuthenticationResponse;
+import com.kimmyungho.board.model.user.UserLoginRequestBody;
 import com.kimmyungho.board.model.user.UserSignUpRequestBody;
 import com.kimmyungho.board.service.UserService;
 import jakarta.validation.Valid;
@@ -29,6 +31,14 @@ public class UserController {
         );
         return ResponseEntity.ok(user);
        // return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @PostMapping("/authenticate")
+    public ResponseEntity<UserAuthenticationResponse> authenticate(
+            @Valid @RequestBody UserLoginRequestBody userLoginRequestBody) {
+        var response = userService.authenticate(userLoginRequestBody.username(), userLoginRequestBody.password());
+        return ResponseEntity.ok(response);
+        // return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
 

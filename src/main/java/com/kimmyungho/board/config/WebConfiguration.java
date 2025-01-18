@@ -1,6 +1,5 @@
 package com.kimmyungho.board.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -19,9 +18,14 @@ import java.util.List;
 @Configuration
 public class WebConfiguration {
 
-    @Autowired private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Autowired private JwtExceptionFilter jwtExceptionFilter;
+    private final JwtExceptionFilter jwtExceptionFilter;
+
+    public WebConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter, JwtExceptionFilter jwtExceptionFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.jwtExceptionFilter = jwtExceptionFilter;
+    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -40,7 +44,8 @@ public class WebConfiguration {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers(HttpMethod.POST,
-                                "/api/*/users"
+                                "/api/*/users",
+                                "/api/*/users/authenticate"
                         )
                         .permitAll()
                         .anyRequest().authenticated())
@@ -56,6 +61,8 @@ public class WebConfiguration {
 
         return http.build();
     }
+
+
 
     // JWT
     // JSON 기반의 인증토큰
