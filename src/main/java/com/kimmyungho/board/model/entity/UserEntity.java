@@ -12,7 +12,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.text.MessageFormat;
 import java.time.ZonedDateTime;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Entity
 @Table(name = "\"user\"")
@@ -25,9 +27,9 @@ public class UserEntity implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
-    @Column private String username;
+    @Column(nullable = false) private String username;
 
-    @Column private String password;
+    @Column(nullable = false) private String password;
 
     @Column private String profile;
 
@@ -41,7 +43,7 @@ public class UserEntity implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() { // 사용자별 권한 구분 처리시 필요
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
@@ -81,8 +83,11 @@ public class UserEntity implements UserDetails {
 
         // Avatar Placeholder Service(https://avatar-placeholder.iran.irana.run) 기반
         // 랜덤한 프로필 사진 설정(1 ~ 100)
-        userEntity.setProfile(MessageFormat.format("https://avatar.iran.liara.run/public/{0}",
-                new Random().nextInt(100) + 1));
+        userEntity.setProfile(
+                "https://avatar.iran.liara.run/public/%d".formatted(
+                        ThreadLocalRandom.current().nextInt(1, 101)
+                )
+        );
 
         // 위 API 미작동시
         // userEntity.setProfile(MessageFormat.format("https://dev-jayce.github.io/public/profile/{0}",

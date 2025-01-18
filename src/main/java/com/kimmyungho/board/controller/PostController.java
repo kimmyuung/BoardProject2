@@ -1,8 +1,8 @@
 package com.kimmyungho.board.controller;
 
-import com.kimmyungho.board.model.Post;
-import com.kimmyungho.board.model.PostPathRequestBody;
-import com.kimmyungho.board.model.PostPostRequestBody;
+import com.kimmyungho.board.model.post.Post;
+import com.kimmyungho.board.model.post.PostPathRequestBody;
+import com.kimmyungho.board.model.post.PostPostRequestBody;
 import com.kimmyungho.board.service.PostService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +18,15 @@ public class PostController {
 
     private static final Logger logger = LoggerFactory.getLogger(PostController.class);
 
-    @Autowired
-    private PostService postService;
+//    @Autowired
+//    private PostService postService;
+
+    private final PostService postService;
+
+    public PostController(PostService postService) {
+        this.postService = postService;
+    }
+
 
     @GetMapping
     public ResponseEntity<List<Post>> getPosts() {

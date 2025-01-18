@@ -1,9 +1,9 @@
 package com.kimmyungho.board.service;
 
 import com.kimmyungho.board.exception.post.PostNotFoundException;
-import com.kimmyungho.board.model.Post;
-import com.kimmyungho.board.model.PostPathRequestBody;
-import com.kimmyungho.board.model.PostPostRequestBody;
+import com.kimmyungho.board.model.post.Post;
+import com.kimmyungho.board.model.post.PostPathRequestBody;
+import com.kimmyungho.board.model.post.PostPostRequestBody;
 import com.kimmyungho.board.model.entity.PostEntity;
 import com.kimmyungho.board.repository.PostEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,13 @@ import java.util.List;
 public class
 PostService {
 
-    @Autowired private PostEntityRepository postEntityRepository;
+   // @Autowired private PostEntityRepository postEntityRepository;
+    private final PostEntityRepository postEntityRepository;
+
+    public PostService(PostEntityRepository postEntityRepository) {
+        this.postEntityRepository = postEntityRepository;
+    }
+
 
     public List<Post> getPosts() {
         List<PostEntity> posteitities = postEntityRepository.findAll();

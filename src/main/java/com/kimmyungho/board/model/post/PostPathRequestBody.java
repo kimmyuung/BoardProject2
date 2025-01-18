@@ -1,4 +1,4 @@
-package com.kimmyungho.board.model;
+package com.kimmyungho.board.model.post;
 
 import lombok.*;
 
