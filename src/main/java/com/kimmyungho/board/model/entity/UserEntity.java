@@ -14,7 +14,8 @@ import java.util.Collections;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Entity
-@Table(name = "\"user\"")
+@Table(name = "\"user\"",
+        indexes = { @Index(name = "user_username_idx", columnList = "username" , unique = true)})
 @SQLDelete(sql = "UPDATE \"user\" SET deleted_date_time = CURRENT_TIMESTAMP WHERE post_id = ?")
 @SQLRestriction("deleted_date_time is NULL")
 @Getter@Setter@EqualsAndHashCode
