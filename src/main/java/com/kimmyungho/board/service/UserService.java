@@ -1,29 +1,31 @@
 package com.kimmyungho.board.service;
 
 import com.kimmyungho.board.exception.user.UserAlreadyExistsException;
+import com.kimmyungho.board.exception.user.UserNotAllowedException;
 import com.kimmyungho.board.exception.user.UserNotFoundException;
 import com.kimmyungho.board.model.entity.UserEntity;
 import com.kimmyungho.board.model.user.User;
 import com.kimmyungho.board.model.user.UserAuthenticationResponse;
+import com.kimmyungho.board.model.user.UserPatchRequestBody;
 import com.kimmyungho.board.repository.UserEntityRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UserService implements UserDetailsService {
 
-    private final UserEntityRepository userEntityRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
+    @Autowired  private  UserEntityRepository userEntityRepository;
+    @Autowired  private  BCryptPasswordEncoder passwordEncoder;
+    @Autowired  private  JwtService jwtService;
 
-    public UserService(UserEntityRepository userEntityRepository, BCryptPasswordEncoder passwordEncoder, JwtService jwtService) {
-        this.userEntityRepository = userEntityRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
-    }
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -56,5 +58,41 @@ public class UserService implements UserDetailsService {
         } else {
             throw new UserNotFoundException();
         }
+    }
+
+    public List<User> getUsers(String query) {
+     List<UserEntity> userEntities;
+
+     if (query != null && !query.isBlank()) {
+        userEntities = userEntityRepository.findByUsernameContaining(query);
+     } else {
+        userEntities = userEntityRepository.findAll();
+     }
+     return userEntities.stream().map(User::from).toList();
+    }
+
+    public User getUser(String username) {
+        var userEntity =
+                userEntityRepository
+                        .findByUsername(username)
+                        .orElseThrow(() -> new UserNotFoundException(username));
+
+    return User.from(userEntity);
+    }
+
+    public User updateUser(
+            String username, UserPatchRequestBody userPatchRequestBody, UserEntity cureentuser) {
+        var userEntity =
+                userEntityRepository
+                        .findByUsername(username)
+                        .orElseThrow(() -> new UserNotFoundException(username));
+        if(!userEntity.equals(cureentuser)) {
+            throw new UserNotAllowedException();
+        }
+        if(userPatchRequestBody.description() != null) {
+            userEntity.setDescription(userPatchRequestBody.description());
+        }
+
+        return User.from(userEntityRepository.save(userEntity));
     }
 }
