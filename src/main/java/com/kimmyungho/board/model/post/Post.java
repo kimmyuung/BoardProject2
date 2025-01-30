@@ -11,6 +11,7 @@ import java.time.ZonedDateTime;
          Long postId,
          String body,
          User user,
+         Long repliesCount,
          ZonedDateTime createDateTime,
          ZonedDateTime updateDateTime,
          ZonedDateTime deleteDateTime
@@ -20,8 +21,10 @@ import java.time.ZonedDateTime;
                 postEntity.getPostId(),
                 postEntity.getBody(),
                 User.from(postEntity.getUser()),
+                postEntity.getRepliesCount(),
                 postEntity.getCreatedDateTime(),
                 postEntity.getUpdatedDateTime(),
-                postEntity.getDeletedDateTime());
+                postEntity.getDeletedDateTime()
+                 );
     }
 }

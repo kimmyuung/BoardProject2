@@ -10,24 +10,22 @@ import org.hibernate.annotations.SQLRestriction;
 import java.time.ZonedDateTime;
 
 @Entity
-@Table(name = "post",
-indexes = { @Index(name = "post_user_idx", columnList = "userid")})
-@SQLDelete(sql = "UPDATE \"post\" SET deleted_date_time = CURRENT_TIMESTAMP WHERE post_id = ?")
+@Table(name = "reply",
+indexes = { @Index(name = "reply_userid_idx", columnList = "userid"),
+        @Index(name = "reply_postid_idx", columnList = "postid")})
+@SQLDelete(sql = "UPDATE \"reply\" SET deleted_date_time = CURRENT_TIMESTAMP WHERE replyid = ?")
 @SQLRestriction("deleted_date_time is NULL")
 // @WHERE ->  해당 제약 조건 추가하는 조건절
 // SOFT DELETE 서비스 상에서 보이지는 않으나 DB 상에는 존재 (조회 및 통계 용도로 사용)
 @Getter@Setter@EqualsAndHashCode
-public class PostEntity {
+public class ReplyEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long postId;
+    private Long replyId;
 
     @Column(columnDefinition = "TEXT")
     private String body;
-
-    @Column // 댓글 수 집계를 위해 사용
-    private Long repliesCount = 0L;
 
     @Column
     private ZonedDateTime createdDateTime;
@@ -43,6 +41,10 @@ public class PostEntity {
     @JoinColumn(name = "userid")
     private UserEntity user;
 
+    @ManyToOne
+    @JoinColumn(name = "postid")
+    private PostEntity post;
+
     @PrePersist
     private void prePersist() {
         this.createdDateTime = ZonedDateTime.now();
@@ -55,10 +57,11 @@ public class PostEntity {
         this.updatedDateTime = ZonedDateTime.now();
     }
 
-    public static PostEntity of(String body, UserEntity user) {
-        var post = new PostEntity();
-        post.setBody(body);
-        post.setUser(user);
-        return post;
+    public static ReplyEntity of(String body, UserEntity user, PostEntity post) {
+        var reply = new ReplyEntity();
+        reply.setBody(body);
+        reply.setUser(user);
+        reply.setPost(post);
+        return reply;
     }
 }
