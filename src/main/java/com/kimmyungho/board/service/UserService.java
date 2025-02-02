@@ -1,12 +1,17 @@
 package com.kimmyungho.board.service;
 
+import com.kimmyungho.board.exception.follow.FollowAlreadyExistException;
+import com.kimmyungho.board.exception.follow.FollowNotFoundException;
+import com.kimmyungho.board.exception.follow.InvalidFollowException;
 import com.kimmyungho.board.exception.user.UserAlreadyExistsException;
 import com.kimmyungho.board.exception.user.UserNotAllowedException;
 import com.kimmyungho.board.exception.user.UserNotFoundException;
+import com.kimmyungho.board.model.entity.FollowEntity;
 import com.kimmyungho.board.model.entity.UserEntity;
 import com.kimmyungho.board.model.user.User;
 import com.kimmyungho.board.model.user.UserAuthenticationResponse;
 import com.kimmyungho.board.model.user.UserPatchRequestBody;
+import com.kimmyungho.board.repository.FollowEntityRepository;
 import com.kimmyungho.board.repository.UserEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -24,6 +29,7 @@ public class UserService implements UserDetailsService {
     @Autowired  private  UserEntityRepository userEntityRepository;
     @Autowired  private  BCryptPasswordEncoder passwordEncoder;
     @Autowired  private  JwtService jwtService;
+    @Autowired  private  FollowEntityRepository followEntityRepository;
 
 
 
@@ -94,5 +100,53 @@ public class UserService implements UserDetailsService {
         }
 
         return User.from(userEntityRepository.save(userEntity));
+    }
+
+    public User follow(String username, UserEntity currentUser) {
+        var following =
+                userEntityRepository
+                        .findByUsername(username)
+                        .orElseThrow(() -> new UserNotFoundException(username));
+        if(following.equals(currentUser)) {
+            throw new InvalidFollowException("A user cannot follow themselves.");
+        }
+
+        followEntityRepository.findByFollowerAndFollowing(currentUser, following)
+                .ifPresent(
+                        follow -> {
+                            throw new FollowAlreadyExistException(currentUser, following);
+                        });
+        followEntityRepository.save(FollowEntity.of(currentUser, following));
+
+        following.setFollowerCount(following.getFollowerCount() + 1);
+        currentUser.setFollowingCount(following.getFollowingCount() + 1);
+
+        userEntityRepository.saveAll(List.of(following, currentUser));
+
+        return User.from(following);
+    }
+
+    public User unfollow(String username, UserEntity currentUser) {
+        var following =
+                userEntityRepository
+                        .findByUsername(username)
+                        .orElseThrow(() -> new UserNotFoundException(username));
+        if(following.equals(currentUser)) {
+            throw new InvalidFollowException("A user cannot unfollow themselves.");
+        }
+
+        followEntityRepository
+                .findByFollowerAndFollowing(currentUser, following)
+                .orElseThrow(
+                        () -> new FollowNotFoundException(currentUser, following)
+                        );
+        followEntityRepository.save(FollowEntity.of(currentUser, following));
+
+        following.setFollowerCount(Math.max(0, following.getFollowerCount() - 1));
+        currentUser.setFollowingCount(Math.max(0, following.getFollowingCount() - 1));
+
+        userEntityRepository.saveAll(List.of(following, currentUser));
+
+        return User.from(following);
     }
 }

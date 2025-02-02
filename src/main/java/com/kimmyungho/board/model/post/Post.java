@@ -12,6 +12,7 @@ import java.time.ZonedDateTime;
          String body,
          User user,
          Long repliesCount,
+         Long likesCount,
          ZonedDateTime createDateTime,
          ZonedDateTime updateDateTime,
          ZonedDateTime deleteDateTime
@@ -22,6 +23,7 @@ import java.time.ZonedDateTime;
                 postEntity.getBody(),
                 User.from(postEntity.getUser()),
                 postEntity.getRepliesCount(),
+                postEntity.getLikesCount(),
                 postEntity.getCreatedDateTime(),
                 postEntity.getUpdatedDateTime(),
                 postEntity.getDeletedDateTime()

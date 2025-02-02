@@ -3,15 +3,19 @@ package com.kimmyungho.board.service;
 import com.kimmyungho.board.exception.post.PostNotFoundException;
 import com.kimmyungho.board.exception.user.UserNotAllowedException;
 import com.kimmyungho.board.exception.user.UserNotFoundException;
+import com.kimmyungho.board.model.entity.LikeEntity;
 import com.kimmyungho.board.model.entity.UserEntity;
 import com.kimmyungho.board.model.post.Post;
 import com.kimmyungho.board.model.post.PostPathRequestBody;
 import com.kimmyungho.board.model.post.PostPostRequestBody;
 import com.kimmyungho.board.model.entity.PostEntity;
+import com.kimmyungho.board.repository.LikeEntityRepository;
 import com.kimmyungho.board.repository.PostEntityRepository;
 import com.kimmyungho.board.repository.UserEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
@@ -21,6 +25,7 @@ PostService {
     @Autowired private PostEntityRepository postEntityRepository;
     @Autowired private UserEntityRepository userEntityRepository;
 
+    @Autowired private LikeEntityRepository likeEntityRepository;
 
     public List<Post> getPosts() {
         List<PostEntity> posteitities = postEntityRepository.findAll();
@@ -84,5 +89,20 @@ PostService {
                         .orElseThrow(() -> new UserNotFoundException(username));
         var postEntities =postEntityRepository.findByUser(userEntity);
         return postEntities.stream().map(Post::from).toList();
+    }
+
+    @Transactional
+    public Post togglelike(Long postId, UserEntity currentUser) {
+        var postEntity =
+                postEntityRepository.findById(postId).orElseThrow( () -> new PostNotFoundException(postId));
+        var likeEntity = likeEntityRepository.findByUserAndPost(currentUser, postEntity);
+        if (likeEntity.isPresent()) {
+            likeEntityRepository.delete(likeEntity.get());
+            postEntity.setLikesCount(Math.max(0, postEntity.getLikesCount() - 1));
+        } else {
+            likeEntityRepository.save(LikeEntity.of(currentUser, postEntity));
+            postEntity.setLikesCount(postEntity.getLikesCount() + 1);
+        }
+        return Post.from(postEntityRepository.save(postEntity));
     }
 }
