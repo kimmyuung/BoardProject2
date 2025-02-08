@@ -2,53 +2,82 @@ package com.kimmyungho.board.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class JwtService {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
 
-    private static final SecretKey key = Jwts.SIG.HS256.key().build();
+    @Value("${jwt.secret}") // application.properties에서 주입
+    private String secret;
 
+    @Value("${jwt.expiration}") // application.properties에서 주입
+    private long expiration; // 밀리초 단위
+
+    // 시크릿 키 생성
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes());
+    }
+
+    // 액세스 토큰 생성
     public String generateAccessToken(UserDetails userDetails) {
-        return generateToken(userDetails.getUsername());
+        Map<String, Object> claims = new HashMap<>();
+        // 필요 시 추가 클레임 추가 (예: 역할)
+        return generateToken(claims, userDetails.getUsername());
     }
 
-    public String getUsername(String accessToken) {
-        return getSubject(accessToken);
+    // 토큰에서 사용자 이름 추출
+    public String getUsername(String token) {
+        return getSubject(token);
     }
 
-    private String generateToken(String subject) {
+    // 토큰 생성
+    private String generateToken(Map<String, Object> claims, String subject) {
         var now = new Date();
-        var exp = new Date(now.getTime() + (100 * 60 * 60 * 3)); // 3시간 이후 만료
+        var exp = new Date(now.getTime() + expiration); // 만료 시간 설정
 
-        return Jwts.builder().subject(subject).signWith(key)
-                .issuedAt(now) // 토큰 생성 시간
+        return Jwts.builder()
+                .claims(claims) // 추가 클레임
+                .subject(subject) // 주제 (일반적으로 사용자 이름)
+                .issuedAt(now) // 토큰 발행 시간
                 .expiration(exp) // 토큰 만료 시간
+                .signWith(getSigningKey()) // 서명
                 .compact();
     }
 
+    // 토큰에서 주제(subject) 추출
     private String getSubject(String token) {
         try {
             return Jwts.parser()
-                    .verifyWith(key)
+                    .verifyWith(getSigningKey()) // 서명 검증
                     .build()
-                    .parseEncryptedClaims(token)
+                    .parseSignedClaims(token) // 토큰 파싱
                     .getPayload()
-                    .getSubject();
-            // 토큰 검증 코드 공식 홈페이지 참조
+                    .getSubject(); // 주제 반환
         } catch (JwtException e) {
-            logger.error("JwtException", e);
-            throw  e;
+            logger.error("JWT 검증 실패: {}", e.getMessage());
+            throw new JwtValidationException("유효하지 않은 JWT 토큰", e);
         }
     }
+
+    // 커스텀 예외 클래스
+    public static class JwtValidationException extends RuntimeException {
+        public JwtValidationException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+}
 //private String getSubject(String token) {
 //    try {
 //        // JWT 토큰을 파싱하고 검증
@@ -78,4 +107,3 @@ public class JwtService {
 //        throw new JwtAuthenticationException("Invalid JWT Token", e);
 //    }
 //}
-}

@@ -45,12 +45,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             var accessToken = authorization.substring(BEARER_PREFIX.length());
             var username = jwtService.getUsername(accessToken);
-            var userDeatils = userService.loadUserByUsername(username);
+            var userDetails = userService.loadUserByUsername(username);
 
             var authenticationToken = new UsernamePasswordAuthenticationToken(
-                    userDeatils,
+                    userDetails,
                     null, // 패스워드 저장 안하므로 필요 없음
-                    userDeatils.getAuthorities() // 권한 정보
+                    userDetails.getAuthorities() // 권한 정보
             ); // 사용자 인증정보 토큰 저장 위해 사용
 
 

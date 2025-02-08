@@ -33,15 +33,15 @@ public class UserEntity implements UserDetails {
 
     @Column private String description;
 
+    @Column private Long followersCount = 0L;
+
+    @Column private Long followingsCount = 0L;
+
     @Column private ZonedDateTime createdDateTime;
 
     @Column private ZonedDateTime updatedDateTime;
 
     @Column private ZonedDateTime deletedDateTime;
-
-    @Column private Long followerCount = 0L;
-
-    @Column private Long followingCount = 0L;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() { // 사용자별 권한 구분 처리시 필요

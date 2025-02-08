@@ -15,7 +15,8 @@ import java.time.ZonedDateTime;
          Long likesCount,
          ZonedDateTime createDateTime,
          ZonedDateTime updateDateTime,
-         ZonedDateTime deleteDateTime
+         ZonedDateTime deleteDateTime,
+         Boolean isLiking
  ) {
     public static Post from(PostEntity postEntity) {
         return new Post(
@@ -26,7 +27,22 @@ import java.time.ZonedDateTime;
                 postEntity.getLikesCount(),
                 postEntity.getCreatedDateTime(),
                 postEntity.getUpdatedDateTime(),
-                postEntity.getDeletedDateTime()
+                postEntity.getDeletedDateTime(),
+                null
                  );
+    }
+
+    public static Post from(PostEntity postEntity, boolean isLiking) {
+        return new Post(
+                postEntity.getPostId(),
+                postEntity.getBody(),
+                User.from(postEntity.getUser()),
+                postEntity.getRepliesCount(),
+                postEntity.getLikesCount(),
+                postEntity.getCreatedDateTime(),
+                postEntity.getUpdatedDateTime(),
+                postEntity.getDeletedDateTime(),
+                isLiking
+        );
     }
 }

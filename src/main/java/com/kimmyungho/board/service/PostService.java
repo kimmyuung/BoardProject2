@@ -27,21 +27,24 @@ PostService {
 
     @Autowired private LikeEntityRepository likeEntityRepository;
 
-    public List<Post> getPosts() {
-        List<PostEntity> posteitities = postEntityRepository.findAll();
-        return posteitities.stream().map(Post::from).toList();
+    public List<Post> getPosts(UserEntity currentUser) {
+        List<PostEntity> postEntities = postEntityRepository.findAll();
+        return postEntities.stream()
+                .map(postEntity -> getPostWithLikgingStatus(postEntity, currentUser))
+                .toList();
     }
 
-    public Post getPostByPostId(Long postId) {
-        var postEntity =
-                postEntityRepository
-                .findById(postId)
-                .orElseThrow(
-                        () -> new PostNotFoundException(postId)
-                );
+    public Post getPostByPostId(Long postId, UserEntity currentUser) {
+        var postEntity = postEntityRepository
+                .findById(postId).orElseThrow(() -> new PostNotFoundException(postId));
         /* posts.stream().filter(post
                 -> postId.equals(post.getPostId())).findFirst();*/
-        return Post.from(postEntity);
+        return getPostWithLikgingStatus(postEntity, currentUser);
+    }
+
+    private Post getPostWithLikgingStatus(PostEntity postEntity, UserEntity currentUser) {
+        var isLiking = likeEntityRepository.findByUserAndPost(currentUser, postEntity).isPresent();
+        return Post.from(postEntity, isLiking);
     }
 
     public Post createPost(PostPostRequestBody postPostRequestBody, UserEntity currentuser) {
@@ -82,13 +85,15 @@ PostService {
         postEntityRepository.delete(postEntity);
     }
 
-    public List<Post> getPostsByUsername(String username) {
+    public List<Post> getPostsByUsername(String username ,UserEntity currentUser) {
         var userEntity =
                 userEntityRepository
                         .findByUsername(username)
                         .orElseThrow(() -> new UserNotFoundException(username));
         var postEntities =postEntityRepository.findByUser(userEntity);
-        return postEntities.stream().map(Post::from).toList();
+        return postEntities.stream()
+                .map(postEntity -> getPostWithLikgingStatus(postEntity, currentUser))
+                .toList();
     }
 
     @Transactional
@@ -99,10 +104,12 @@ PostService {
         if (likeEntity.isPresent()) {
             likeEntityRepository.delete(likeEntity.get());
             postEntity.setLikesCount(Math.max(0, postEntity.getLikesCount() - 1));
+            return Post.from(postEntityRepository.save(postEntity), false);
         } else {
             likeEntityRepository.save(LikeEntity.of(currentUser, postEntity));
             postEntity.setLikesCount(postEntity.getLikesCount() + 1);
+            return Post.from(postEntityRepository.save(postEntity), true);
         }
-        return Post.from(postEntityRepository.save(postEntity));
+
     }
 }
