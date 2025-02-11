@@ -30,7 +30,7 @@ PostService {
     public List<Post> getPosts(UserEntity currentUser) {
         List<PostEntity> postEntities = postEntityRepository.findAll();
         return postEntities.stream()
-                .map(postEntity -> getPostWithLikgingStatus(postEntity, currentUser))
+                .map(postEntity -> getPostWithLikingStatus(postEntity, currentUser))
                 .toList();
     }
 
@@ -39,10 +39,10 @@ PostService {
                 .findById(postId).orElseThrow(() -> new PostNotFoundException(postId));
         /* posts.stream().filter(post
                 -> postId.equals(post.getPostId())).findFirst();*/
-        return getPostWithLikgingStatus(postEntity, currentUser);
+        return getPostWithLikingStatus(postEntity, currentUser);
     }
 
-    private Post getPostWithLikgingStatus(PostEntity postEntity, UserEntity currentUser) {
+    private Post getPostWithLikingStatus(PostEntity postEntity, UserEntity currentUser) {
         var isLiking = likeEntityRepository.findByUserAndPost(currentUser, postEntity).isPresent();
         return Post.from(postEntity, isLiking);
     }
@@ -92,7 +92,7 @@ PostService {
                         .orElseThrow(() -> new UserNotFoundException(username));
         var postEntities =postEntityRepository.findByUser(userEntity);
         return postEntities.stream()
-                .map(postEntity -> getPostWithLikgingStatus(postEntity, currentUser))
+                .map(postEntity -> getPostWithLikingStatus(postEntity, currentUser))
                 .toList();
     }
 
@@ -112,4 +112,6 @@ PostService {
         }
 
     }
+
+
 }

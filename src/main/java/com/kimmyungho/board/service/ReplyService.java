@@ -3,6 +3,7 @@ package com.kimmyungho.board.service;
 import com.kimmyungho.board.exception.post.PostNotFoundException;
 import com.kimmyungho.board.exception.reply.ReplyNotFoundException;
 import com.kimmyungho.board.exception.user.UserNotAllowedException;
+import com.kimmyungho.board.exception.user.UserNotFoundException;
 import com.kimmyungho.board.model.entity.ReplyEntity;
 import com.kimmyungho.board.model.entity.UserEntity;
 import com.kimmyungho.board.model.reply.Reply;
@@ -10,6 +11,7 @@ import com.kimmyungho.board.model.reply.ReplyPathRequestBody;
 import com.kimmyungho.board.model.reply.ReplyPostRequestBody;
 import com.kimmyungho.board.repository.PostEntityRepository;
 import com.kimmyungho.board.repository.ReplyEntityRepository;
+import com.kimmyungho.board.repository.UserEntityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,8 @@ ReplyService {
 
     @Autowired private ReplyEntityRepository replyEntityRepository;
     @Autowired private PostEntityRepository postEntityRepository;
+    @Autowired
+    private UserEntityRepository userEntityRepository;
 
     public List<Reply> getRepliesByPostId(Long postId) {
         var postEntity =
@@ -85,4 +89,11 @@ ReplyService {
         postEntityRepository.save(postEntity);
     }
 
+    public List<Reply> getRepliesByUser(String username) {
+        var userEntity = userEntityRepository.findByUsername(username)
+                .orElseThrow( () -> new UserNotFoundException(username));
+
+        var replies = replyEntityRepository.findByUser(userEntity);
+        return replies.stream().map(Reply::from).toList();
+    }
 }
